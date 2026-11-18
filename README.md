@@ -5,7 +5,7 @@ signed identify, consent and an offline queue. No dependencies. Android 6.0 (API
 
 ```kotlin
 // app/build.gradle.kts
-implementation("com.metricraven:metricraven-android:0.1.0")
+implementation("com.metricraven:metricraven-android:0.2.0")
 ```
 
 ```kotlin
@@ -37,6 +37,19 @@ MetricRaven.reset()
 - **Deep links.** `MetricRaven.openedFrom(intent.data)` attaches utm_* campaign parameters to the next screen.
 
 Docs: https://metricraven.com/docs/android-sdk
+
+## Paywall events
+
+Paywall views, closes, cancels and taps from RevenueCat, Superwall, Adapty or your own paywall, with no dependency on their SDKs:
+
+```kotlin
+val paywall = MetricRaven.paywall(provider = "revenuecat", offeringId = offering.identifier)
+paywall.impression()
+// PaywallListener: onPurchaseCancelled → paywall.cancel(), onInteraction → paywall.interaction(event.rawProperties)
+// Superwall: paywall.superwall(eventInfo.event.rawName, eventInfo.params)
+```
+
+Send paywall events from the app or forward them from your backend, not both, or they are counted twice. See https://metricraven.com/docs/paywall-events.
 
 ## Modules
 

@@ -96,6 +96,17 @@ public object MetricRaven {
     @JvmStatic @JvmOverloads
     public fun identify(userId: String, traits: Map<String, Any?>? = null) { client?.identify(userId, traits) }
 
+    /** Paywall events (RevenueCat, Superwall, Adapty or your own paywall) through the shared client: see MetricRavenPaywall. */
+    @JvmStatic @JvmOverloads
+    public fun paywall(
+        provider: String? = null,
+        paywallId: String? = null,
+        paywallName: String? = null,
+        offeringId: String? = null,
+        placement: String? = null,
+        props: Map<String, Any?>? = null,
+    ): MetricRavenPaywall = MetricRavenPaywall(provider, paywallId, paywallName, offeringId, placement, props) { name, p -> track(name, p) }
+
     /** Signed identify with a token your server signed (signIdentity in @metricraven/node). */
     @JvmStatic
     public fun identifyWithToken(token: String) { client?.identifyWithToken(token) }
