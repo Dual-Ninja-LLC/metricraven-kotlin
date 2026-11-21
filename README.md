@@ -1,24 +1,46 @@
 # MetricRaven for Android (Kotlin)
 
-MetricRaven analytics for native Android apps, in Kotlin or Java: screen views, events, identify,
-signed identify, consent and an offline queue. No dependencies. Android 6.0 (API 23) and later.
+[![Maven Central](https://img.shields.io/maven-central/v/com.metricraven/metricraven-android)](https://central.sonatype.com/artifact/com.metricraven/metricraven-android)
+
+The Android SDK for [MetricRaven](https://metricraven.com), privacy-friendly analytics with revenue
+attribution: see which traffic actually pays. It records screen views, events and signed-in users from
+native Android apps in Kotlin or Java, so app users sit next to your website visitors, payments and
+subscriptions in one dashboard. No dependencies. Android 6.0 (API 23) and later.
+
+## Install
+
+Maven Central is in every new project's repositories.
 
 ```kotlin
 // app/build.gradle.kts
-implementation("com.metricraven:metricraven-android:0.2.0")
+dependencies {
+    implementation("com.metricraven:metricraven-android:0.2.0")
+}
+```
+
+## Usage
+
+In your site's **Settings → General → Site**, add your application ID (for example `com.example.app`)
+under **Mobile apps**. Events from app IDs that aren't listed are rejected.
+
+```kotlin
+import android.app.Application
+import com.metricraven.MetricRaven
+
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        // The app ID defaults to your application ID; version, build and device are read automatically.
+        MetricRaven.configure(this, siteId = "ana_pub_…")
+    }
+}
 ```
 
 ```kotlin
-import com.metricraven.MetricRaven
-
-// In Application.onCreate. The app ID (your application ID) must be listed under
-// Settings → General → Site → Mobile apps.
-MetricRaven.configure(this, siteId = "ana_pub_…")
-
 MetricRaven.screen("Home")
 MetricRaven.track("signup", mapOf("plan" to "pro"))
 
-// After sign-in: the same user ID your server events and server identify use.
+// After sign-in: the same user ID your server events, server identify and payments use.
 MetricRaven.identify("user_42", mapOf("name" to "Ana", "email" to "ana@example.com"))
 // Or verified, with a token your server signs (signIdentity in @metricraven/node):
 MetricRaven.identifyWithToken(tokenFromYourServer)
@@ -27,20 +49,25 @@ MetricRaven.identifyWithToken(tokenFromYourServer)
 MetricRaven.reset()
 ```
 
+Open the app on a device or emulator: it shows as a live visitor in Traffic, under the person you
+identified it as, and screens appear under Pages as paths like `/Home`.
+
+## Features
+
+- **Revenue per user and channel.** Identify with the same user ID you use for RevenueCat, Superwall,
+  Adapty, Stripe or your server, and purchases and renewals are credited to where that user came from.
+- **Paywall events.** Views, closes, cancels and taps from RevenueCat, Superwall, Adapty or your own
+  paywall, with no dependency on their SDKs (see below).
 - **Consent.** By default nothing is stored on the device and the server derives a daily visitor ID.
   `configure(…, consent = true)` or `setConsent(true)` keeps a random ID so a visitor lasts across days.
-- **Offline.** Events queue in SharedPreferences (up to 500, for 7 days) and are delivered in order,
+- **Offline queue.** Events queue in SharedPreferences (up to 500, for 7 days) and are delivered in order,
   with backoff on network errors, rate limits and server errors. The queue flushes when the app comes
   to the foreground, goes to the background, and when the network comes back.
 - **Language and screen size.** Each screen view carries the device's language (`en-US`) and the
   screen size in dp (`411x914`, like CSS pixels and iOS points). Events never carry them.
 - **Deep links.** `MetricRaven.openedFrom(intent.data)` attaches utm_* campaign parameters to the next screen.
 
-Docs: https://metricraven.com/docs/android-sdk
-
-## Paywall events
-
-Paywall views, closes, cancels and taps from RevenueCat, Superwall, Adapty or your own paywall, with no dependency on their SDKs:
+### Paywall events
 
 ```kotlin
 val paywall = MetricRaven.paywall(provider = "revenuecat", offeringId = offering.identifier)
@@ -49,7 +76,21 @@ paywall.impression()
 // Superwall: paywall.superwall(eventInfo.event.rawName, eventInfo.params)
 ```
 
-Send paywall events from the app or forward them from your backend, not both, or they are counted twice. See https://metricraven.com/docs/paywall-events.
+Send paywall events from the app or forward them from your backend, not both, or they are counted
+twice. See [Paywall events](https://metricraven.com/docs/paywall-events).
+
+## Privacy
+
+The library adds only the `INTERNET` and `ACCESS_NETWORK_STATE` permissions. It reads no advertising ID
+or device identifier, and without consent it stores nothing on the device.
+
+## Links
+
+- Docs: https://metricraven.com/docs/android-sdk
+- Paywall events: https://metricraven.com/docs/paywall-events
+- Dashboard and sign-up: https://metricraven.com
+- iOS and Swift: https://github.com/Dual-Ninja-LLC/metricraven-swift
+- Support: support@metricraven.com
 
 ## Modules
 
@@ -86,3 +127,7 @@ METRICRAVEN_E2E_SECRET_KEY=ana_sec_… METRICRAVEN_E2E_APP_ID=com.metricraven.e2
   -Pandroid.testInstrumentationRunnerArguments.siteId=ana_pub_… \
   -Pandroid.testInstrumentationRunnerArguments.identityToken=<signIdentity token>
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE). Published by Dual Ninja LLC.
